@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareBridge - Medtronic CareLink Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161c2e;
+            --card-border: #232d48;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ef4444, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .brand-sub {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .glucose-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .glucose-label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .glucose-number {
+            font-size: 4.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--accent-green);
+        }
+
+        .glucose-unit {
+            font-size: 1rem;
+            color: var(--text-sub);
+            margin-left: 4px;
+        }
+
+        .glucose-trend {
+            font-size: 1.8rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .time-badge {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 14px;
+        }
+
+        .chart-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-top: 4px;
+        }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(22, 28, 46, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="brand-icon">🩸</div>
+                <div>
+                    <div class="brand-title">CareBridge</div>
+                    <div class="brand-sub">Medtronic CareLink Continuous Glucose Monitor</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="/setup" class="btn">⚙️ 快速設定</a>
+                <button class="btn" onclick="triggerSync()">🔄 手動同步</button>
+            </div>
+        </header>
+
+        <div class="grid-main">
+            <div class="card glucose-card">
+                <div class="glucose-label">最新連續血糖</div>
+                <div>
+                    <span class="glucose-number" id="glucose-val">--</span>
+                    <span class="glucose-unit">mg/dL</span>
+                </div>
+                <div class="glucose-trend" id="glucose-trend">
+                    <span id="trend-icon">--</span>
+                    <span id="trend-text">載入中...</span>
+                </div>
+                <div class="time-badge" id="last-update">最後更新: 讀取中</div>
+            </div>
+
+            <div class="card chart-card">
+                <div class="card-header">
+                    <div class="card-title">📈 血糖趨勢圖 (最近 24 小時)</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="cgmChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-lbl">24h 平均血糖</div>
+                <div class="stat-val" id="stat-avg">-- mg/dL</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-lbl">TIR (目標範圍內 %)</div>
+                <div class="stat-val" style="color: var(--accent-green);" id="stat-tir">-- %</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-lbl">預估 HbA1c (GMI)</div>
+                <div class="stat-val" style="color: var(--accent-orange);" id="stat-gmi">-- %</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-lbl">高 / 低 比例</div>
+                <div class="stat-val" style="font-size: 1.1rem; margin-top: 8px;" id="stat-range">-- / --</div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div>
+                <span class="dot"></span> CareLink 連線狀態: <strong id="status-text" style="color:#fff;">連線成功</strong>
+                <span style="margin-left: 12px; padding: 3px 10px; background: rgba(34, 197, 94, 0.15); border: 1px solid var(--accent-green); border-radius: 20px; font-size: 0.75rem; color: var(--accent-green); font-weight: 500;">🟢 Token 自動續約生效中</span>
+            </div>
+            <div>設備: Medtronic MiniMed Guardian</div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        async function fetchDashboard() {
+            try {
+                const res = await fetch('/api/v1/entries?_=' + Date.now());
+                const data = await res.json();
+                
+                if (data.latest) {
+                    const val = data.latest.sgv;
+                    const valElem = document.getElementById('glucose-val');
+                    valElem.innerText = val;
+
+                    if (val > 180) valElem.style.color = 'var(--accent-orange)';
+                    else if (val < 70) valElem.style.color = 'var(--accent-red)';
+                    else valElem.style.color = 'var(--accent-green)';
+
+                    document.getElementById('trend-icon').innerText = getDirectionIcon(data.latest.direction);
+                    document.getElementById('trend-text').innerText = data.latest.direction;
+                    
+                    if (data.latest.dateString) {
+                        const dt = new Date(data.latest.dateString);
+                        document.getElementById('last-update').innerText = '最後更新: ' + dt.toLocaleString('zh-TW', { hour12: false });
+                    }
+                }
+
+                if (data.stats) {
+                    document.getElementById('stat-avg').innerText = data.stats.avg + ' mg/dL';
+                    document.getElementById('stat-tir').innerText = data.stats.tir + ' %';
+                    document.getElementById('stat-gmi').innerText = data.stats.gmi + ' %';
+                    document.getElementById('stat-range').innerText = data.stats.high + '% / ' + data.stats.low + '%';
+                }
+
+                if (data.history) {
+                    renderChart(data.history);
+                }
+            } catch (e) {
+                console.error("Fetch dashboard error:", e);
+            }
+        }
+
+        function getDirectionIcon(dir) {
+            const map = {
+                'DoubleUp': '⇈', 'SingleUp': '↑', 'FortyFiveUp': '↗',
+                'Flat': '→', 'FortyFiveDown': '↘', 'SingleDown': '↓',
+                'DoubleDown': '⇊'
+            };
+            return map[dir] || '→';
+        }
+
+        function renderChart(history) {
+            const ctx = document.getElementById('cgmChart').getContext('2d');
+            const labels = history.map(h => {
+                const d = new Date(h.dateString);
+                return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+            });
+            const values = history.map(h => h.sgv);
+
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.update();
+                return;
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '血糖 (mg/dL)',
+                        data: values,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: '#232d48' }, ticks: { color: '#9ca3af', maxTicksLimit: 8 } },
+                        y: { min: 40, max: 300, grid: { color: '#232d48' }, ticks: { color: '#9ca3af' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function triggerSync() {
+            try {
+                const res = await fetch('/api/v1/sync', { method: 'POST' });
+                const json = await res.json();
+                alert(json.status === 'success' ? '同步成功！' : '同步完成（若無 token 請至 /setup 設定）。');
+                fetchDashboard();
+            } catch (e) {
+                alert('連線失敗: ' + e);
+            }
+        }
+
+        fetchDashboard();
+        setInterval(fetchDashboard, 30000);
+    </script>
+</body>
+</html>

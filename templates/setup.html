@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareBridge - CareLink 自動同步設定</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161c2e;
+            --card-border: #232d48;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-green: #22c55e;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .setup-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 35px 30px;
+            max-width: 580px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-icon {
+            font-size: 2.8rem;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            margin-top: 6px;
+        }
+
+        /* 模式切換頁籤 */
+        .tab-group {
+            display: flex;
+            background: rgba(11, 15, 25, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(11, 15, 25, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--accent-blue-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 導引與輔助說明 */
+        .guide-box {
+            background: rgba(11, 15, 25, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+        }
+
+        .guide-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+        .external-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            box-sizing: border-box;
+            margin: 8px 0;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 25px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .result-title {
+            color: var(--accent-green);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .url-box {
+            background: #0b0f19;
+            border: 1px dashed var(--card-border);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #fff;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .copy-btn {
+            background: var(--accent-green);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:hover {
+            opacity: 0.9;
+        }
+
+        .badge-recommend {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            font-size: 0.72rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-card">
+        <div class="header">
+            <div class="brand-icon">🩸</div>
+            <h1 class="title">CareBridge 同步設定</h1>
+            <div class="subtitle">自動綁定美敦力 CareLink 帳號，輕鬆生成 xDrip+ 數據源網址</div>
+        </div>
+
+        <!-- 模式選擇 Tab -->
+        <div class="tab-group">
+            <button class="tab-btn active" onclick="switchTab('auto')">
+                ⚡ CareLink 帳密自動登入 <span class="badge-recommend">推薦</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('manual')">
+                🔑 手動貼入 Token / Cookie
+            </button>
+        </div>
+
+        <!-- 模式一：帳號密碼自動登入 (推薦) -->
+        <div id="tab-auto" class="tab-content active">
+            <div class="form-group">
+                <label for="auto-username">CareLink 帳號 (Username / Email)</label>
+                <input type="text" id="auto-username" placeholder="請輸入美敦力 CareLink 登入帳號">
+            </div>
+
+            <div class="form-group">
+                <label for="auto-password">CareLink 密碼 (Password)</label>
+                <input type="password" id="auto-password" placeholder="請輸入美敦力 CareLink 登入密碼">
+            </div>
+
+            <div class="form-group">
+                <label for="auto-country">國家/地區 (Country)</label>
+                <select id="auto-country">
+                    <option value="TW" selected>台灣 (TW)</option>
+                    <option value="US">美國 (US)</option>
+                    <option value="EU">歐洲 / 國際 (EU)</option>
+                </select>
+            </div>
+
+            <button class="btn" id="btn-auto-login" onclick="handleAutoLogin()">🚀 一鍵自動登入並驗證連線</button>
+        </div>
+
+        <!-- 模式二：手動貼入 Token / Cookie -->
+        <div id="tab-manual" class="tab-content">
+            <div class="guide-box">
+                <div class="guide-title">💡 手動取得 Token 說明</div>
+                <div style="font-size: 0.82rem; color: var(--text-sub); line-height: 1.5;">
+                    1. 先前往 <a href="https://carelink.minimed.eu" target="_blank" rel="noopener" style="color:#60a5fa;">CareLink 官網登入</a><br>
+                    2. 按 <kbd>F12</kbd> 進入 DevTools ➔ <strong>Application</strong> ➔ <strong>Cookies</strong> 複製 <code>auth_tmp_token</code>，或直接貼上整段 Cookie 文字。
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="manual-country">國家/地區 (Country)</label>
+                <select id="manual-country">
+                    <option value="TW" selected>台灣 (TW)</option>
+                    <option value="US">美國 (US)</option>
+                    <option value="EU">歐洲 / 國際 (EU)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="manual-token">CareLink auth_tmp_token (或整段 Cookie / URL)</label>
+                <input type="text" id="manual-token" placeholder="請貼入 auth_tmp_token 金鑰或 Cookie" oninput="autoCleanToken(this)">
+            </div>
+
+            <button class="btn" id="btn-manual-save" onclick="handleManualSave()">🚀 驗證 Token 並啟用</button>
+        </div>
+
+        <!-- 結果顯示區 -->
+        <div class="result-box" id="result-box">
+            <div class="result-title">✅ 認證與同步成功！自動背景續約已啟用！</div>
+            <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">
+                請在手機 <strong>xDrip+</strong> ➔ <strong>Settings</strong> ➔ <strong>Data Source</strong> 選擇 <strong>Nightscout Follower</strong>，並貼入下方網址：
+            </div>
+            <div class="url-box" id="ns-url">http://.../api/v1/</div>
+            <button class="copy-btn" onclick="copyUrl()">📋 一鍵複製專屬 xDrip+ 網址</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'auto') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-auto').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-manual').classList.add('active');
+            }
+        }
+
+        function autoCleanToken(input) {
+            const val = input.value.trim();
+            const match = val.match(/auth_tmp_token=([a-zA-Z0-9%\._\-]+)/);
+            if (match) {
+                input.value = match[1];
+            }
+        }
+
+        async function handleAutoLogin() {
+            const username = document.getElementById('auto-username').value.trim();
+            const password = document.getElementById('auto-password').value.trim();
+            const country = document.getElementById('auto-country').value;
+            const btn = document.getElementById('btn-auto-login');
+
+            if (!username || !password) {
+                alert('請填寫美敦力 CareLink 的登入帳號與密碼！');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = '⏳ 正在自動登入美敦力伺服器中...';
+
+            try {
+                const res = await fetch('/setup/auto-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, country })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    showSuccess();
+                } else {
+                    alert('登入失敗：' + (data.message || '請檢查帳號密碼是否正確'));
+                }
+            } catch (e) {
+                alert('連線異常：' + e);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 一鍵自動登入並驗證連線';
+            }
+        }
+
+        async function handleManualSave() {
+            const tokenInput = document.getElementById('manual-token').value.trim();
+            const country = document.getElementById('manual-country').value;
+            const btn = document.getElementById('btn-manual-save');
+
+            if (!tokenInput) {
+                alert('請貼入您的 CareLink auth_tmp_token 金鑰或 Cookie！');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = '⏳ 正在驗證金鑰...';
+
+            try {
+                const res = await fetch('/setup/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenInput, country: country })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    showSuccess();
+                } else {
+                    alert('驗證失敗：' + (data.message || '請確認 Token 是否有效'));
+                }
+            } catch (e) {
+                alert('連線失敗：' + e);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 驗證 Token 並啟用';
+            }
+        }
+
+        function showSuccess() {
+            const hostUrl = window.location.origin + '/api/v1/';
+            document.getElementById('ns-url').innerText = hostUrl;
+            document.getElementById('result-box').style.display = 'block';
+        }
+
+        function copyUrl() {
+            const text = document.getElementById('ns-url').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已成功複製網址！請至手機 xDrip+ 貼上：\n' + text);
+            });
+        }
+    </script>
+</body>
+</html>
