@@ -241,6 +241,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/setup')
+@app.route('/setup/')
 def setup_page():
     return render_template('setup.html')
 
@@ -319,7 +320,10 @@ def setup_save():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/api/v1/entries', methods=['GET'])
+@app.route('/api/v1', methods=['GET', 'POST'])
+@app.route('/api/v1/', methods=['GET', 'POST'])
+@app.route('/api/v1/entries', methods=['GET', 'POST'])
+@app.route('/api/v1/entries/', methods=['GET', 'POST'])
 @app.route('/api/v1/entries.json', methods=['GET', 'POST'])
 def get_entries():
     if request.method == 'POST':
