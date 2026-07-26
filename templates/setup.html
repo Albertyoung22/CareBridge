@@ -67,7 +67,6 @@
             margin-top: 6px;
         }
 
-        /* 模式切換頁籤 */
         .tab-group {
             display: flex;
             background: rgba(11, 15, 25, 0.6);
@@ -158,7 +157,6 @@
             cursor: not-allowed;
         }
 
-        /* 導引與輔助說明 */
         .guide-box {
             background: rgba(11, 15, 25, 0.6);
             border: 1px solid var(--card-border);
@@ -172,21 +170,6 @@
             font-weight: 700;
             color: #60a5fa;
             margin-bottom: 10px;
-        }
-
-        .external-btn {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background: linear-gradient(135deg, #0284c7, #2563eb);
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 10px;
-            border-radius: 8px;
-            text-decoration: none;
-            box-sizing: border-box;
-            margin: 8px 0;
         }
 
         .result-box {
@@ -255,7 +238,6 @@
             <div class="subtitle">自動綁定美敦力 CareLink 帳號，輕鬆生成 xDrip+ 數據源網址</div>
         </div>
 
-        <!-- 模式選擇 Tab -->
         <div class="tab-group">
             <button class="tab-btn active" onclick="switchTab('auto')">
                 ⚡ CareLink 帳密自動登入 <span class="badge-recommend">推薦</span>
@@ -369,7 +351,15 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, country })
                 });
-                const data = await res.json();
+
+                let data;
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
+                }
 
                 if (data.status === 'success') {
                     showSuccess();
@@ -377,7 +367,7 @@
                     alert('登入失敗：' + (data.message || '請檢查帳號密碼是否正確'));
                 }
             } catch (e) {
-                alert('連線異常：' + e);
+                alert('連線異常：' + e.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = '🚀 一鍵自動登入並驗證連線';
@@ -403,7 +393,15 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: tokenInput, country: country })
                 });
-                const data = await res.json();
+
+                let data;
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
+                }
 
                 if (data.status === 'success') {
                     showSuccess();
@@ -411,7 +409,7 @@
                     alert('驗證失敗：' + (data.message || '請確認 Token 是否有效'));
                 }
             } catch (e) {
-                alert('連線失敗：' + e);
+                alert('連線異常：' + e.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = '🚀 驗證 Token 並啟用';
